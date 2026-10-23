@@ -8,6 +8,8 @@ workflows:
       groups:
         - ios-signing
       xcode: latest
+      vars:
+        APP_STORE_APPLE_ID: 1337513895
     scripts:
       - name: Initialize keychain
         script: keychain initialize
@@ -22,6 +24,13 @@ workflows:
         script: keychain add-certificates
       - name: Set up code signing
         script: xcode-project use-profiles
+      - name: Increment build number
+        script: |
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          LATEST=${LATEST:-0}
+          NEW=$((LATEST + 1))
+          echo "TestFlight latest build: $LATEST -> new build: $NEW"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEW" KimpoCC/Info.plist
       - name: Build IPA
         script: |
           xcode-project build-ipa \
@@ -30,8 +39,7 @@ workflows:
       - name: Upload to TestFlight
         script: |
           app-store-connect publish \
-            --path $(find build/ios/ipa -name "*.ipa" | head -1) \
-            --testflight
+            --path $(find build/ios/ipa -name "*.ipa" | head -1)
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
