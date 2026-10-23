@@ -3,7 +3,7 @@ workflows:
     name: iOS App Store
     max_build_duration: 60
     integrations:
-      app_store_connect: moonos-asc
+      app_store_connect: "Greenit API"
     environment:
       groups:
         - ios-signing
