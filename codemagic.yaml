@@ -1,0 +1,35 @@
+workflows:
+  ios-app-store:
+    name: iOS App Store
+    max_build_duration: 60
+    environment:
+      groups:
+        - ios-signing
+      xcode: latest
+    scripts:
+      - name: Initialize keychain
+        script: keychain initialize
+      - name: Fetch signing files from Apple
+        script: |
+          app-store-connect fetch-signing-files \
+            net.moonos.ios.KimpoCC \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+      - name: Add certificates to keychain
+        script: keychain add-certificates
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --project "KimpoCC.xcodeproj" \
+            --scheme "KimpoCC"
+      - name: Upload to TestFlight
+        script: |
+          app-store-connect publish \
+            --path $(find build/ios/ipa -name "*.ipa" | head -1) \
+            --testflight
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
