@@ -8,7 +8,8 @@ import WebKit
 
 class ViewController: UIViewController {
 
-    private let homeURL = "https://www.gimpocc.co.kr/Mobile"
+    // 사이트 대표 주소. /Mobile 은 http://.../index 를 거쳐 가므로 쓰지 않는다.
+    private let homeURL = "https://www.gimpocc.co.kr"
 
     private var webView: WKWebView!
     private let indicator = UIActivityIndicatorView(style: .large)
